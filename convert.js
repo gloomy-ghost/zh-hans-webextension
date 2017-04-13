@@ -14,24 +14,38 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+'use strict';
+function convert(content){
+    const characters = new Set(content);
+    for (let character of characters){
+        const hans = HansDict[character];
+        if (hans)
+            content = content.replace(RegExp(character, 'gm'), hans);
+    }
+    return content;
+}
+
 browser.runtime.onMessage.addListener(
     (message, sender, sendResponse) => {
-        let html = message.html;
-        const characters = new Set(html);
-        for (let character of characters){
-            const hans = HansDict[character];
-            if (hans)
-                html = html.replace(RegExp(character, 'gm'), hans);
-        }
-        sendResponse(html);
+        const title = convert(message.title),
+              html = convert(message.html);
+
+        sendResponse({
+            title,
+            html
+        });
     }
 )
 
 const contentScript = '\
-    browser.runtime.sendMessage({html:document.body.innerHTML})\
-        .then((result) => {\
-            document.body.innerHTML = result;\
-        });\
+    browser.runtime.sendMessage({\
+        title: document.title,\
+        html: document.body.innerHTML\
+    })\
+    .then((result) => {\
+        document.title = result.title;\
+        document.body.innerHTML = result.html;\
+    });\
 '
 
 browser.browserAction.onClicked.addListener(
