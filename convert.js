@@ -16,6 +16,23 @@
  */
 'use strict';
 
+function getJSON(url){
+    let data,
+        request = new XMLHttpRequest();
+    request.open('GET', url, false);
+
+    request.onload = function() {
+      if (this.status >= 200 && this.status < 400)
+        data = JSON.parse(this.response);
+    };
+
+    request.send();
+    return data;
+}
+
+const HansDict = getJSON('/dict/hans.json'),
+      WordDict = getJSON('/dict/word.json');
+
 const wordCache = new Set();
 for (const word in WordDict){
     wordCache.add(word[0]);
