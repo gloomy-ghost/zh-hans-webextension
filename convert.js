@@ -76,26 +76,28 @@ function convert(content){
 
 browser.runtime.onMessage.addListener(
     (message, sender, sendResponse) => {
-        const title = convert(message.title),
-              html = convert(message.html);
-
-        sendResponse({
-            title,
-            html
-        });
+        const result = convert(message);
+        sendResponse(result);
     }
-)
+);
 
-const contentScript = '\
-    browser.runtime.sendMessage({\
-        title: document.title,\
-        html: document.body.innerHTML\
-    })\
-    .then((result) => {\
-        document.title = result.title;\
-        document.body.innerHTML = result.html;\
-    });\
-'
+const contentScript = "\
+    browser.runtime.sendMessage(document.title)\
+        .then((result)=>{\
+            document.title = result;\
+        });\
+\
+    const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);\
+    while (treeWalker.nextNode()) {\
+        let node = treeWalker.currentNode;\
+        if (node.nodeValue.length){\
+            browser.runtime.sendMessage(node.nodeValue)\
+                .then((result)=>{\
+                    node.nodeValue = result;\
+                });\
+        }\
+    }\
+"
 
 browser.browserAction.onClicked.addListener(
     () => {
@@ -103,4 +105,4 @@ browser.browserAction.onClicked.addListener(
             {code: contentScript}
         )
     }
-)
+);
