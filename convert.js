@@ -15,12 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 'use strict';
+
+const wordCache = new Set();
+for (const word in WordDict){
+    wordCache.add(word[0]);
+}
+Object.assign(HansDict, WordDict);
+
+
 function convert(content){
-    const characters = new Set(content);
-    for (let character of characters){
-        const hans = HansDict[character];
-        if (hans)
-            content = content.replace(RegExp(character, 'gm'), hans);
+    const arr = content.split(''),
+          converted = new Set();
+
+    for (let index = 0; index < arr.length; index++){
+        const character = arr[index];
+        if (converted.has(character)){
+            continue;
+        }
+
+        let from = character,
+            to = HansDict[character];
+
+        if (wordCache.has(character)){
+            let word = character;
+            for (let offset = 1; offset < 8; offset++){
+                word += arr[index+offset];
+                const hans = HansDict[word];
+                if (hans){
+                    from = word;
+                    to = hans;
+                    break;
+                }
+            }
+        }
+
+        if (to){
+            content = content.replace(RegExp(from, 'gm'), to);
+            converted.add(from);
+        }
     }
     return content;
 }
