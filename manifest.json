@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "version": "0.1",
+  "name": "转换至简体",
+  "permissions": ["activeTab"],
+  "icons": {
+    "48": "a.png"
+  },
+  "background": {
+    "scripts": [
+      "dict.js",
+      "convert.js"
+    ]
+  },
+  "browser_action": {
+    "default_icon": "a.png",
+    "default_title": "转换至简体"
+  }
+}
