@@ -1,8 +1,12 @@
 {
   "manifest_version": 2,
-  "version": "0.2.3",
+  "version": "0.3.0",
   "name": "转换至简体",
   "permissions": ["activeTab"],
+  "optional_permissions": [
+    "webNavigation",
+    "<all_urls>"
+  ],
   "icons": {
     "48": "a.png"
   },
@@ -14,5 +18,8 @@
   "browser_action": {
     "default_icon": "a.png",
     "default_title": "转换至简体"
+  },
+  "options_ui": {
+    "page": "options/options.html"
   }
 }

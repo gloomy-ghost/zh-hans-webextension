@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>转换至简体 - 选项</title>
+  <script src="options.js"></script>
+  <style type="text/css">
+    input, select {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>转换至简体</h1>
+  <h2>自动转换域名</h2>
+  <table>
+    <tr>
+      <td>
+        <p>自动转换</p>
+      </td>
+      <td>
+        <input type="checkbox" id="autoconvert">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <input type="text" value="" id="newWhitelistDomain">
+      </td>
+      <td>
+        <button id="addButton">添加</button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <select id="excludedDomainsBox" size="10" multiple></select>
+      </td>
+      <td>
+        <button id="removeButton">移除</button>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

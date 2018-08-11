@@ -81,28 +81,46 @@ browser.runtime.onMessage.addListener(
     }
 );
 
-const contentScript = "\
-    browser.runtime.sendMessage(document.title)\
-        .then((result)=>{\
-            document.title = result;\
-        });\
-\
-    const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);\
-    while (treeWalker.nextNode()) {\
-        let node = treeWalker.currentNode;\
-        if (node.nodeValue.length){\
-            browser.runtime.sendMessage(node.nodeValue)\
-                .then((result)=>{\
-                    node.nodeValue = result;\
-                });\
-        }\
-    }\
-"
-
 browser.browserAction.onClicked.addListener(
     () => {
-        browser.tabs.executeScript(
-            {code: contentScript}
-        )
+        if (localStorage.getItem("ask_permission") === "true") {
+            browser.permissions.request({
+                permissions: ["webNavigation"],
+                origins: ["<all_urls>"]
+            })
+                .then(initNavigationListener);
+        }
+        browser.tabs.executeScript({
+            file: "/contentScript.js"
+        });
     }
 );
+
+function getHostName(href) {
+    let link = document.createElement("a");
+    link.href = href;
+    return link.hostname;
+}
+
+function initNavigationListener(granted) {
+    if (granted) {
+        browser.webNavigation.onCompleted.addListener(
+            (details) => {
+                let host = getHostName(details.url);
+                if (localStorage.getItem(host)) {
+                    browser.tabs.executeScript(
+                        details.tabId,
+                        { file: "/contentScript.js" }
+                    );
+                }
+            }
+        );
+        console.log("Registered navigation listener");
+    }
+}
+
+browser.permissions.contains({
+    permissions: ["webNavigation"],
+    origins: ["<all_urls>"]
+})
+    .then(initNavigationListener);
