@@ -37,7 +37,6 @@ const wordCache = new Set();
 for (const word in WordDict){
     wordCache.add(word[0]);
 }
-Object.assign(HansDict, WordDict);
 
 
 function convert(content){
@@ -57,7 +56,7 @@ function convert(content){
             let word = character;
             for (let offset = 1; offset < 8; offset++){
                 word += arr[index+offset];
-                const hans = HansDict[word];
+                const hans = WordDict[word];
                 if (hans){
                     from = word;
                     to = hans;
@@ -102,19 +101,20 @@ function getHostName(href) {
     return link.hostname;
 }
 
-function initNavigationListener(granted) {
-    if (granted) {
-        browser.webNavigation.onCompleted.addListener(
-            (details) => {
-                let host = getHostName(details.url);
-                if (localStorage.getItem(host)) {
-                    browser.tabs.executeScript(
-                        details.tabId,
-                        { file: "/contentScript.js" }
-                    );
-                }
-            }
+function autoConvert(details) {
+    let host = getHostName(details.url);
+    if (localStorage.getItem(host)) {
+        browser.tabs.executeScript(
+            details.tabId,
+            { file: "/contentScript.js" }
         );
+    }
+}
+
+function initNavigationListener(granted) {
+    if (granted &&
+            !browser.webNavigation.onCompleted.hasListener(autoConvert)) {
+        browser.webNavigation.onCompleted.addListener(autoConvert);
         console.log("Registered navigation listener");
     }
 }
@@ -122,5 +122,4 @@ function initNavigationListener(granted) {
 browser.permissions.contains({
     permissions: ["webNavigation"],
     origins: ["<all_urls>"]
-})
-    .then(initNavigationListener);
+}).then(initNavigationListener);
